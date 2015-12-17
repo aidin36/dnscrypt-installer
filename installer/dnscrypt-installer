@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# dnscrypt-installer, a script to install and configure DNSCrypt.
+# Copyright (c) 2015, Aidin Gharibnavaz <aidin@aidinhut.com>
+# <https://github.com/aidin36/dnscrypt-installer>
+#
+# dnscrypt-installer is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# dnscrypt-installer is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with dnscrypt-installer.  If not, see <http://www.gnu.org/licenses/>.
+
+# Stop on any errors.
+set -e
+
+# Runs the specified command as root.
+run_as_root()
+{
+  if [[ $EUID -ne 0 ]]; then
+    echo;
+    echo "I need root access.";
+    su -c "$1";
+  else
+    # We are already root.
+    $1;
+  fi
+}
+
+# Putting everything in a temp directory.
+WORKINGDIR=/tmp/dnscrypt-intaller/
+CURRENTLOC=`pwd`
+
+mkdir -p $WORKINGDIR
+cd $WORKINGDIR
+
+echo "Installing required packages"
+# TODO: Also install make, g++, etc.
+run_as_root "apt-get install --yes libsodium-dev dnsmasq"
+
+# TODO: Clear the working directory if it's older than one day.
+# If user re-start the script several tims, we don't want to re-download the
+# package each time. However, we want the script to be able to update to the
+# latest package, so the old packages remaining in the temp directory should
+# be removed.
+echo "Downloading dsncrypt-proxy..."
+wget -c https://download.dnscrypt.org/dnscrypt-proxy/LATEST.tar.bz2
+
+echo "Extracting..."
+tar xjf LATEST.tar.bz2
+
+echo "Compiling..."
+cd dnscrypt-proxy*
+./configure
+make
+
+echo "Installing..."
+run_as_root "make install"
+
+echo "Configuring..."
+# Getting back to current location.
+cd $CURRENTLOC
+
+run_as_root "
+mv -f /etc/dnsmasq.conf{,.original};
+cp dnsmasq.conf /etc/;
+cp dnscrypt-proxy /etc/init.d/;
+chmod +x /etc/init.d/dnscrypt-proxy;
+update-rc.d dnscrypt-proxy defaults;
+mv -f /etc/resolv.conf{,.original};
+cp resolv.conf /etc/;
+chmod 644 /etc/resolv.conf;
+service dnscrypt-proxy start;
+service dnsmasq restart;"
