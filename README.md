@@ -2,7 +2,9 @@ Script to Automated Installation of DNSCrypt
 --------------------------------------------
 
 This is a simple bash script which installs and configures
-[DNSCrypt](https://www.dnscrypt.org/).
+[DNSCrypt](https://www.dnscrypt.org/). It downloads and installs
+``dnscrypt-proxy`` and ``dnsmasq`` (as a DNS Cache), and configure
+them to work with each others.
 
 To use it, simply ``cd`` to ``installer`` directory, and run
 ``dnscrypt-installer``.
