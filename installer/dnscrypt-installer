@@ -68,6 +68,7 @@ echo "Configuring..."
 cd $CURRENTLOC
 
 run_as_root "
+service dnsmasq stop;
 mv -f /etc/dnsmasq.conf{,.original};
 cp dnsmasq.conf /etc/;
 cp dnscrypt-proxy /etc/init.d/;
@@ -77,4 +78,4 @@ mv -f /etc/resolv.conf{,.original};
 cp resolv.conf /etc/;
 chmod 644 /etc/resolv.conf;
 service dnscrypt-proxy start;
-service dnsmasq restart;"
+service dnsmasq start;"
