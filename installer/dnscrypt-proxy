@@ -24,7 +24,7 @@ PIDFILE="/var/run/dnscrypt-proxy.pid"
 
 case "$1" in
 start) log_daemon_msg "Starting dnscrypt-proxy"
-       $DAEMON --daemonize --ephemeral-keys --local-address="127.0.0.2:10053" --resolver-name="adamas" --pidfile=$PIDFILE
+       $DAEMON --daemonize --ephemeral-keys --local-address="127.0.0.2:10053" --resolver-name="fvz-anytwo" --pidfile=$PIDFILE
        log_daemon_msg $?
        ;;
 stop) log_daemon_msg "Stopping dnscrypt-proxy"
